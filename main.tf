@@ -9,7 +9,7 @@ resource "azurerm_resource_group" "rg" {
 }
 
 # App Service Plan
-resource "azurerm_app_service_plan" "app_service_plan" {
+resource "azurerm_service_plan" "app_service_plan" {
   name                = "acme-appservice-plan"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
@@ -34,6 +34,12 @@ resource "azurerm_app_service" "app_service_middleware" {
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
   app_service_plan_id = azurerm_app_service_plan.app_service_plan.id
+}
+
+# Add Azure CLI authentication
+provider "azurerm" {
+  features {}
+  use_cli_auth = true
 }
 
 # Application Database (Azure SQL Database)
