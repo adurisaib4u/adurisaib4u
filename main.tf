@@ -1,14 +1,8 @@
-# Azure provider (existing provider block)
+# Azure provider
 provider "azurerm" {
   features {}
+  use_cli_auth = true
 }
-
-# Remove or modify the duplicate provider configuration
-# Comment out or delete the following duplicate provider block if not needed
-# provider "azurerm" {
-#   features {}
-#   use_cli_auth = true
-# }
 
 # Resource group
 resource "azurerm_resource_group" "rg" {
@@ -42,12 +36,6 @@ resource "azurerm_app_service" "app_service_middleware" {
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
   app_service_plan_id = azurerm_service_plan.app_service_plan.id
-}
-
-# Add Azure CLI authentication
-provider "azurerm" {
-  features {}
-  use_cli_auth = true
 }
 
 # Application Database (Azure SQL Database)
