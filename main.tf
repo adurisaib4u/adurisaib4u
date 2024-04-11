@@ -1,7 +1,6 @@
 # Azure provider
 provider "azurerm" {
   features {}
-  use_cli_auth = true
 }
 
 # Resource group
