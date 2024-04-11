@@ -15,8 +15,10 @@ resource "azurerm_service_plan" "app_service_plan" {
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
   kind                = "App"
-  sku_name            = "your_sku_name_here"  # Add your SKU name here
-  os_type             = "Linux"  # or "Windows"
+  sku {
+    tier = var.app_service_tier
+    size = "S1"
+  }
 }
 
 # Web API Application (Backend for frontend)
@@ -36,7 +38,7 @@ resource "azurerm_app_service" "app_service_middleware" {
 }
 
 # Application Database (Azure SQL Database)
-resource "azurerm_sql_server" "sql_server" {
+resource "azurerm_mssql_server" "sql_server" {
   name                         = var.sql_server_name
   resource_group_name          = azurerm_resource_group.rg.name
   location                     = var.location
@@ -45,11 +47,11 @@ resource "azurerm_sql_server" "sql_server" {
   administrator_login_password = var.sql_admin_password
 }
 
-resource "azurerm_sql_database" "sql_db" {
+resource "azurerm_mssql_database" "sql_db" {
   name                = var.sql_database_name
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location
-  server_name         = azurerm_sql_server.sql_server.name
+  server_id           = azurerm_mssql_server.sql_server.id
   edition             = var.sql_sku
   collation           = "SQL_Latin1_General_CP1_CI_AS"
 }
