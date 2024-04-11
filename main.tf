@@ -15,10 +15,8 @@ resource "azurerm_service_plan" "app_service_plan" {
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
   kind                = "App"
-  sku {
-    tier = var.app_service_tier
-    size = "S1"
-  }
+  sku_name            = "your_sku_name_here"  # Add your SKU name here
+  os_type             = "Linux"  # or "Windows"
 }
 
 # Web API Application (Backend for frontend)
