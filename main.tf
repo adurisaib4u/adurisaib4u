@@ -10,11 +10,12 @@ resource "azurerm_resource_group" "rg" {
 }
 
 # App Service Plan
-resource "azurerm_service_plan" "app_service_plan" {
+resource "azurerm_app_service_plan" "app_service_plan" {
   name                = "acme-appservice-plan"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
   kind                = "App"
+  reserved = true  # Set this to true if you want a Reserved SKU
   sku {
     tier = var.app_service_tier
     size = "S1"
@@ -26,7 +27,7 @@ resource "azurerm_app_service" "app_service_bff" {
   name                = "acme-bff-appservice"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
-  app_service_plan_id = azurerm_service_plan.app_service_plan.id
+  app_service_plan_id = azurerm_app_service_plan.app_service_plan.id
 }
 
 # Web API Application (Middleware)
@@ -34,7 +35,7 @@ resource "azurerm_app_service" "app_service_middleware" {
   name                = "acme-middleware-appservice"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
-  app_service_plan_id = azurerm_service_plan.app_service_plan.id
+  app_service_plan_id = azurerm_app_service_plan.app_service_plan.id
 }
 
 # Application Database (Azure SQL Database)
@@ -50,10 +51,16 @@ resource "azurerm_mssql_server" "sql_server" {
 resource "azurerm_mssql_database" "sql_db" {
   name                = var.sql_database_name
   resource_group_name = azurerm_resource_group.rg.name
-  location            = var.location
+  location            = azurerm_mssql_server.sql_server.location  # Use the server's location
   server_id           = azurerm_mssql_server.sql_server.id
   edition             = var.sql_sku
   collation           = "SQL_Latin1_General_CP1_CI_AS"
+}
+
+# Private DNS zone for SQL Server
+resource "azurerm_private_dns_zone" "sql_dns_zone" {
+  name                = "privatelink.database.windows.net"
+  resource_group_name = azurerm_resource_group.rg.name
 }
 
 # Associate private DNS zone with private endpoint
@@ -62,12 +69,6 @@ resource "azurerm_private_dns_zone_virtual_network_link" "sql_dns_link" {
   resource_group_name   = azurerm_resource_group.rg.name
   private_dns_zone_name = azurerm_private_dns_zone.sql_dns_zone.name
   virtual_network_id    = azurerm_virtual_network.vnet.id
-}
-
-# DNS settings for private endpoint
-resource "azurerm_private_dns_zone" "sql_dns_zone" {
-  name                = "privatelink.database.windows.net"
-  resource_group_name = azurerm_resource_group.rg.name
 }
 
 # Virtual network
